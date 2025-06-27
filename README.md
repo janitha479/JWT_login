@@ -14,7 +14,7 @@ This project is a Node.js REST API for user authentication and authorization usi
 1. **Clone the repository**
 
    ```sh
-   git clone <your-repo-url>
+   git clone https://github.com/janitha479/JWT_login.git
    cd JWT_login
    ```
 
