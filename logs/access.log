@@ -1,0 +1,4 @@
+::ffff:127.0.0.1 - - [27/Jun/2025:22:09:46 +0000] "POST /api/auth/login HTTP/1.1" 200 374 "-" "vscode-restclient"
+::ffff:127.0.0.1 - - [27/Jun/2025:22:10:12 +0000] "GET /api/admin/stats HTTP/1.1" 403 38 "-" "vscode-restclient"
+::ffff:127.0.0.1 - - [27/Jun/2025:22:10:19 +0000] "GET /api/admin/users HTTP/1.1" 200 27 "-" "vscode-restclient"
+::ffff:127.0.0.1 - - [27/Jun/2025:22:10:33 +0000] "POST /api/auth/logout HTTP/1.1" 200 37 "-" "vscode-restclient"

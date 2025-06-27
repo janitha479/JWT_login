@@ -1,0 +1,53 @@
+POST http://localhost:5000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "admin1@example.com",
+  "phone": "0771234567",
+  "password": "123456789",
+  "roleName": "admin"
+}
+
+### Login 
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin1@example.com",
+  "password": "123456789"
+}
+
+### visit admin-page
+GET http://localhost:5000/api/admin/users
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYyMTg2LCJleHAiOjE3NTEwNjMwODZ9.4_-7CQbpshBPSAFJWKk7A3lI9QJ3CqYcRYILoMWYJ6w
+
+### visit admin-stats
+GET http://localhost:5000/api/admin/stats
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYwMzc2LCJleHAiOjE3NTEwNjEyNzZ9.l0RrOU0NDorFHPULq0UoIhjR31EM_OZxqbA2S2X_ekk
+
+
+### visit user-page
+GET http://localhost:5000/api/user/book-service
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Miwicm9sZSI6InVzZXIiLCJpYXQiOjE3NTEwNjExNDEsImV4cCI6MTc1MTA2MjA0MX0.f_aoRETCavvNAZi_bnpF8kGBSFUG0w9gJUBo8oEjvkg
+
+### visit worker-page
+GET http://localhost:5000/api/worker/jobs
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDU0ODA1LCJleHAiOjE3NTEwNTU3MDV9.LLVNuv8bpj_-WOpo1B9i4l_jcQfjf60SsrrD6FS9DSk
+
+### refresh token
+POST http://localhost:5000/api/auth/refresh
+Content-Type: application/json
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzUxMDU5MDU4LCJleHAiOjE3NTE2NjM4NTh9.aodvdS4TIFqm6KyuRFirDgfveN6HqS8Hubi9V6Hveo4"
+}
+
+### logout
+POST http://localhost:5000/api/auth/logout
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYxMjE5LCJleHAiOjE3NTEwNjIxMTl9.uXPUs0mCRpcKywR4P2dg_R7tjwyYrHlQsIr5vB_qCRw
+
+{
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzUxMDYyMTg2LCJleHAiOjE3NTE2NjY5ODZ9.-a0x5IGdAlVZAAsUpBNCm1PQ0I2FKy641fKZUy-HcM8"
+}
+
