@@ -2,7 +2,7 @@
 
 ## About the Project
 
-This project is a Node.js REST API for user authentication and authorization using JWT (JSON Web Tokens) and Prisma ORM. It supports user registration, login, token refresh, logout, and role-based access control. The backend is built with Express.js and uses a PostgreSQL (or other supported) database via Prisma.
+This project is a Node.js REST API for user authentication and authorization using JWT (JSON Web Tokens) and Prisma ORM. It supports user registration, login, token refresh, logout, and role-based access control. The backend is built with Express.js and uses a Mysql (or other supported) database via Prisma.
 
 **Logging:**
 - The project uses `morgan` and `rotating-file-stream` to log all HTTP requests.
