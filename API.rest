@@ -17,13 +17,24 @@ Content-Type: application/json
   "password": "123456789"
 }
 
+### Mobile Login (imitate mobile client)
+POST http://localhost:5000/api/auth/login
+Content-Type: application/json
+X-Client-Type: mobile
+
+{
+  "email": "admin1@example.com",
+  "password": "123456789"
+}
+
+
 ### visit admin-page
 GET http://localhost:5000/api/admin/users
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYyMTg2LCJleHAiOjE3NTEwNjMwODZ9.4_-7CQbpshBPSAFJWKk7A3lI9QJ3CqYcRYILoMWYJ6w
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxNzM5MzM4LCJleHAiOjE3NTE3NDAyMzh9.9iXJcPxm-8aYPDFR_hCfobekZUTtvkSF5oRSlOuy0AY
 
 ### visit admin-stats
 GET http://localhost:5000/api/admin/stats
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYwMzc2LCJleHAiOjE3NTEwNjEyNzZ9.l0RrOU0NDorFHPULq0UoIhjR31EM_OZxqbA2S2X_ekk
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxNzM2MjgxLCJleHAiOjE3NTE3MzcxODF9.ZZP0oOWIkHvOmFyJz5yeYmHNHOTUnEUXyFKUOm4Jpq8
 
 
 ### visit user-page
@@ -38,16 +49,10 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6I
 POST http://localhost:5000/api/auth/refresh
 Content-Type: application/json
 
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzUxMDU5MDU4LCJleHAiOjE3NTE2NjM4NTh9.aodvdS4TIFqm6KyuRFirDgfveN6HqS8Hubi9V6Hveo4"
-}
+{"refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwiaWF0IjoxNzUxNzM5NzY4LCJleHAiOjE3NTIzNDQ1Njh9.H67f2JQCEGNV_aiCatleCqdCC2j0u1z-YaK40MJvwfE"}
 
 ### logout
 POST http://localhost:5000/api/auth/logout
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Mywicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxMDYxMjE5LCJleHAiOjE3NTEwNjIxMTl9.uXPUs0mCRpcKywR4P2dg_R7tjwyYrHlQsIr5vB_qCRw
-
-{
-  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MywiaWF0IjoxNzUxMDYyMTg2LCJleHAiOjE3NTE2NjY5ODZ9.-a0x5IGdAlVZAAsUpBNCm1PQ0I2FKy641fKZUy-HcM8"
-}
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwicm9sZSI6ImFkbWluIiwiaWF0IjoxNzUxNzM5NzY4LCJleHAiOjE3NTE3NDA2Njh9.b9TCYtGby3zjH429VFuTaj35JTzqML6KWlsf0IGlkEM
 

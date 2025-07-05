@@ -78,28 +78,35 @@ exports.login = async (req, res) => {
       { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
     );
 
-    // Save refresh token to DB
-    await prisma.refreshToken.create({
-      data: {
-        token: refreshToken,
-        userId: user.id,
-        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
-      },
+    // Set refresh token as HTTP-only cookie for web
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    // Optional: log login activity
+    // Detect client type
+    const isMobile = req.headers["x-client-type"] === "mobile";
+
+    // Return access token and (optionally) refresh token
+    const response = {
+      message: "Login successful",
+      accessToken,
+      role: user.role.name,
+    };
+    if (isMobile) {
+      response.refreshToken = refreshToken;
+    }
+
+    res.status(200).json(response);
+
+    // Log the login activity based on web or mobile
     await prisma.userActivity.create({
       data: {
         userId: user.id,
-        action: "login",
+        action: isMobile ? "login (mobile)" : "login",
       },
-    });
-
-    res.status(200).json({
-      message: "Login successful",
-      accessToken,
-      refreshToken,
-      role: user.role.name,
     });
   } catch (err) {
     console.error(err);
@@ -108,69 +115,117 @@ exports.login = async (req, res) => {
 };
 
 exports.refreshToken = async (req, res) => {
-  const { refreshToken } = req.body;
+  // Try to get refresh token from cookie first (for web browsers)
+  let refreshToken = req.cookies.refreshToken;
 
-  if (!refreshToken)
-    return res.status(401).json({ message: "No token provided" });
+  // If not in cookie, check request body (for mobile apps)
+  if (!refreshToken && req.body.refreshToken) {
+    refreshToken = req.body.refreshToken;
+  }
 
-  const session = await prisma.refreshToken.findUnique({
-    where: { token: refreshToken },
-  });
-  if (!session)
-    return res.status(403).json({ message: "Invalid refresh token" });
+  if (!refreshToken) {
+    return res.status(401).json({ message: "No refresh token provided" });
+  }
 
-  jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET, (err, userData) => {
-    if (err)
-      return res.status(403).json({ message: "Expired or invalid token" });
+  try {
+    // Verify the refresh token
+    const userData = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    const newAccessToken = generateAccessToken({
-      id: userData.id,
-      role: userData.role,
+    // Get user with role information
+    const user = await prisma.user.findUnique({
+      where: { id: userData.id },
+      include: { role: true },
     });
-    res.json({ accessToken: newAccessToken });
-  });
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Generate new access token
+    const newAccessToken = jwt.sign(
+      { id: user.id, role: user.role.name },
+      process.env.JWT_ACCESS_SECRET,
+      { expiresIn: process.env.JWT_EXPIRES_IN }
+    );
+
+    // Generate new refresh token (rotation)
+    const newRefreshToken = jwt.sign(
+      { id: user.id },
+      process.env.JWT_REFRESH_SECRET,
+      { expiresIn: process.env.JWT_REFRESH_EXPIRES_IN }
+    );
+
+    // Set new refresh token as HTTP-only cookie (for web browsers)
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    // Return both tokens (access token in body, refresh token in both cookie and body)
+    res.json({
+      accessToken: newAccessToken,
+      refreshToken: newRefreshToken, // Include for mobile apps
+      role: user.role.name,
+    });
+  } catch (err) {
+    console.error("Refresh Token Error:", err);
+    return res.status(403).json({
+      message: "Invalid or expired refresh token",
+      error: process.env.NODE_ENV === "development" ? err.message : undefined,
+    });
+  }
 };
 
 exports.logout = async (req, res) => {
   try {
-    const { refreshToken } = req.body;
-    const authHeader = req.headers.authorization;
+    // Get refresh token from cookie or body
+    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
 
-    if (!authHeader || !authHeader.startsWith("Bearer ")) {
-      return res
-        .status(401)
-        .json({ message: "Access token missing or malformed" });
-    }
-
-    const accessToken = authHeader.split(" ")[1];
-    const decoded = jwt.decode(accessToken);
-
-    if (!decoded || !decoded.id) {
-      return res.status(400).json({ message: "Invalid access token" });
-    }
-    //Check the refresToken is in the table
-    await prisma.refreshToken.findFirst({
-      where: { userId: decoded.id, token: refreshToken },
-    });
     if (!refreshToken) {
-      return res.status(403).json({ message: "Invalid refresh token" });
+      return res.status(401).json({
+        message: "No active session found",
+        status: "error",
+      });
     }
-    // Delete the refresh token from DB
-    await prisma.refreshToken.deleteMany({
-      where: { token: refreshToken },
-    });
 
-    // Log logout activity
-    await prisma.userActivity.create({
-      data: {
-        userId: decoded.id, // Use decoded ID from token
-        action: "logout",
-      },
-    });
+    // Verify the refresh token is valid before logging out
+    try {
+      const userData = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
 
-    res.json({ message: "Logged out successfully" });
+      // Get the user
+      const user = await prisma.user.findUnique({
+        where: { id: userData.id },
+      });
+
+      if (user) {
+        // Log the logout activity
+        await prisma.userActivity.create({
+          data: {
+            userId: user.id,
+            action: "logout",
+          },
+        });
+      }
+    } catch (tokenError) {
+      // Token is invalid/expired, but we'll still clear the cookie
+      console.log("Invalid token during logout:", tokenError.message);
+    }
+
+    // For web browsers - clear the HTTP-only cookie
+    res.clearCookie("refreshToken");
+
+    res.json({
+      message: "Logged out successfully",
+      status: "success",
+      timestamp: new Date().toISOString(),
+    });
   } catch (error) {
     console.error("Logout error:", error);
-    res.status(500).json({ message: "Internal server error" });
+    res.status(500).json({
+      message: "Logout failed",
+      error: process.env.NODE_ENV === "development" ? error.message : undefined,
+    });
   }
 };

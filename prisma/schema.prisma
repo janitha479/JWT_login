@@ -8,16 +8,15 @@ datasource db {
 }
 
 model User {
-  id            Int            @id @default(autoincrement())
-  email         String         @unique
-  phone         String?
-  password      String
-  roleId        Int
-  role          Role           @relation("UserRole", fields: [roleId], references: [id])
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-  activities    UserActivity[]
-  refreshTokens RefreshToken[] // plural name for clarity
+  id         Int            @id @default(autoincrement())
+  email      String         @unique
+  phone      String?
+  password   String
+  roleId     Int
+  role       Role           @relation("UserRole", fields: [roleId], references: [id])
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  activities UserActivity[]
 }
 
 model Role {
@@ -37,13 +36,4 @@ model UserActivity {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
-}
-
-model RefreshToken {
-  id        Int      @id @default(autoincrement())
-  token     String   @unique
-  userId    Int
-  user      User     @relation(fields: [userId], references: [id])
-  expiresAt DateTime
-  createdAt DateTime @default(now())
 }

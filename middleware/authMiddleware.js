@@ -21,12 +21,16 @@ exports.verifyAccessToken = async (req, res, next) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    // Check if user has any valid refresh tokens
-    const hasRefreshToken = await prisma.refreshToken.findFirst({
-      where: { userId: user.id },
-    });
+    // Check if user has a valid refresh token cookie
+    const refreshToken = req.cookies.refreshToken;
+    if (!refreshToken) {
+      return res.status(401).json({ message: "Session expired. Please log in again." });
+    }
 
-    if (!hasRefreshToken) {
+    // Verify the refresh token
+    try {
+      jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    } catch (err) {
       return res.status(401).json({ message: "Session expired. Please log in again." });
     }
 

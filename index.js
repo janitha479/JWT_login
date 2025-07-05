@@ -6,11 +6,11 @@ const rfs = require("rotating-file-stream"); // for log rotation
 const fs = require("fs");
 const path = require("path");
 const authRoutes = require("./routes/authRoutes");
-const protectedRoutes = require("./routes/protectedRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
 const workerRoutes = require("./routes/workerRoutes");
 const { PrismaClient } = require("@prisma/client");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -34,8 +34,14 @@ app.use(morgan("dev")); // to console
 app.use(morgan("combined", { stream: accessLogStream })); // to file
 // ─────────────────────────────────────────────────────────────
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000", // your frontend origin
+    credentials: true, // important for cookies
+  })
+);
 app.use(express.json());
+app.use(cookieParser()); // Add this line
 
 const prisma = new PrismaClient();
 prisma
@@ -49,7 +55,6 @@ prisma
 
 // Routes
 app.use("/api/auth", authRoutes);
-app.use("/api/protected", protectedRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/worker", workerRoutes);
