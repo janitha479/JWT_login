@@ -2,9 +2,10 @@
 
 ## About the Project
 
-This project is a Node.js REST API for user authentication and authorization using JWT (JSON Web Tokens) and Prisma ORM. It supports user registration, login, token refresh, logout, and role-based access control. The backend is built with Express.js and uses a Mysql (or other supported) database via Prisma.
+This project is a Node.js REST API for user authentication and authorization using JWT (JSON Web Tokens) and Prisma ORM. It supports user registration, login, token refresh, logout, and role-based access control. The backend is built with Express.js and uses a MySQL (or other supported) database via Prisma.
 
 **Logging:**
+
 - The project uses `morgan` and `rotating-file-stream` to log all HTTP requests.
 - Logs are written to the `logs/` directory, with daily rotation and compression (up to 90 days).
 - This helps with monitoring, debugging, and auditing API usage.
@@ -22,7 +23,6 @@ This project is a Node.js REST API for user authentication and authorization usi
 
    ```sh
    npm install
-   npm install rotating-file-stream
    ```
 
 3. **Configure environment variables**
@@ -66,7 +66,6 @@ This project is a Node.js REST API for user authentication and authorization usi
   - `authMiddleware.js` - Protects routes, checks JWTs.
 - `routes/` - API route definitions:
   - `authRoutes.js` - Auth endpoints (register, login, refresh, logout).
-  - `protectedRoutes.js` - Example protected endpoints.
   - `userRoutes.js`, `adminRoutes.js`, `workerRoutes.js` - Role-based endpoints.
 - `prisma/` - Prisma ORM files:
   - `schema.prisma` - Database schema.
@@ -82,14 +81,17 @@ This project is a Node.js REST API for user authentication and authorization usi
   - Body: `{ "email": "...", "phone": "...", "password": "...", "roleName": "..." }`
 - `POST /api/auth/login` - Login and receive access/refresh tokens
   - Body: `{ "email": "...", "password": "..." }`
+  - **Web:** The refresh token is set as an HTTP-only cookie (not accessible to JS).
+  - **Mobile:** Send the header `X-Client-Type: mobile` to receive the refresh token in the response body.
 - `POST /api/auth/refresh` - Get a new access token using a refresh token
-  - Body: `{ "refreshToken": "..." }`
+  - **Web:** No body needed; the backend reads the refresh token from the HTTP-only cookie.
+  - **Mobile:** Send `{ "refreshToken": "..." }` in the request body.
 - `POST /api/auth/logout` - Logout and invalidate refresh token
-  - Body: `{ "refreshToken": "..." }`
+  - **Web:** No body needed; the backend clears the HTTP-only cookie.
+  - **Mobile:** Send `{ "refreshToken": "..." }` in the request body.
 
-### Protected/User/Admin/Worker
+### User/Admin/Worker
 
-- `GET /api/protected/...` - Example protected endpoints (require access token)
 - `GET /api/user/...` - User-specific endpoints (require user role)
 - `GET /api/admin/...` - Admin-specific endpoints (require admin role)
 - `GET /api/worker/...` - Worker-specific endpoints (require worker role)
@@ -98,4 +100,6 @@ This project is a Node.js REST API for user authentication and authorization usi
 
 - Access tokens are required in the `Authorization: Bearer <token>` header for protected routes.
 - Refresh tokens are used to obtain new access tokens without re-authenticating.
+- For web clients, refresh tokens are managed via HTTP-only cookies for security.
+- For mobile clients, refresh tokens are returned in the response body and must be stored securely (e.g., Keychain/SecureStore).
 - Make sure to remove `output = "./prisma/generated"` from `schema.prisma` before running `npx prisma generate`.
