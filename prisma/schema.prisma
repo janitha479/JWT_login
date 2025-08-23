@@ -9,14 +9,17 @@ datasource db {
 
 model User {
   id         Int            @id @default(autoincrement())
+  name       String
   email      String         @unique
   phone      String?
+  address    String?
   password   String
   roleId     Int
   role       Role           @relation("UserRole", fields: [roleId], references: [id])
   createdAt  DateTime       @default(now())
   updatedAt  DateTime       @updatedAt
   activities UserActivity[]
+  kyc        WorkerKYC? // One-to-one relation with WorkerKYC
 }
 
 model Role {
@@ -36,4 +39,36 @@ model UserActivity {
   createdAt DateTime @default(now())
 
   user User @relation(fields: [userId], references: [id])
+}
+
+// New KYC model for workers
+model WorkerKYC {
+  id                 Int       @id @default(autoincrement())
+  userId             Int       @unique // One-to-one with User
+  idType             String // Passport, National ID, Driver's License, etc.
+  idNumber           String
+  idExpiryDate       DateTime?
+  idFrontImageURL    String?
+  idBackImageURL     String?
+  selfieImageURL     String?
+  addressProofURL    String?
+  dateOfBirth        DateTime?
+  nationality        String?
+  verificationStatus KYCStatus @default(PENDING)
+  verifiedAt         DateTime?
+  rejectionReason    String?
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  // Relation to User
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([verificationStatus])
+}
+
+enum KYCStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+  EXPIRED
 }
