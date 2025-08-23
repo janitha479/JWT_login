@@ -36,7 +36,7 @@ app.use(morgan("combined", { stream: accessLogStream })); // to file
 
 app.use(
   cors({
-    origin: "http://localhost:3000", // your frontend origin
+    origin: "http://localhost:8081", // your frontend origin
     credentials: true, // important for cookies
   })
 );
