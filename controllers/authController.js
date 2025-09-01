@@ -14,9 +14,16 @@ const generateRefreshToken = (user) =>
   });
 
 exports.register = async (req, res) => {
-  const { email, phone, password, roleName } = req.body;
+  const { email, phone, password, roleName, name } = req.body;
 
   try {
+    // Validate required fields
+    if (!email || !password) {
+      return res
+        .status(400)
+        .json({ message: "Email and password are required" });
+    }
+
     const existingUser = await prisma.user.findUnique({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: "Email already registered" });
@@ -35,6 +42,7 @@ exports.register = async (req, res) => {
 
     const newUser = await prisma.user.create({
       data: {
+        name,
         email,
         phone,
         password: hashedPassword,
